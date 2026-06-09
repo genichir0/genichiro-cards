@@ -47,7 +47,7 @@
         body::before {
             content: "";
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+ Top: 0; left: 0; width: 100%; height: 100%;
             background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
             background-size: 24px 24px;
             z-index: -1;
@@ -218,8 +218,8 @@
             gap: 0.8rem;
         }
 
-        .tracker-text { font-size: 0.85rem; color: var(--text-muted); }
-        .tracker-count { font-weight: 700; color: var(--text-main); border-bottom: 2px dashed var(--nothing-red); }
+        .tracker-text { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; }
+        .tracker-count { font-weight: 700; color: var(--text-main); border-bottom: 2px dashed var(--nothing-red); padding: 0 4px; display: inline-block; }
 
         .goal-selector { display: flex; align-items: center; gap: 6px; }
         .goal-selector label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0; }
@@ -236,7 +236,7 @@
             transition: border-color 0.2s ease;
         }
         .import-box:hover { border-color: var(--text-main); }
-        .import-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        .import-box p { font-size: 1rem; font-weight: 700; color: var(--text-muted); }
         .import-box input { display: none; }
         .import-status { font-size: 0.85rem; color: var(--text-main); margin-top: 0.6rem; display: none; font-weight: 500; text-align: center; }
 
@@ -329,9 +329,10 @@
                         <option value="20">20 كلمة</option>
                         <option value="30">30 كلمة</option>
                         <option value="50">50 كلمة</option>
+                        <option value="99999">كل الكلمات</option>
                     </select>
                 </div>
-                <span class="tracker-text">المحفوظة اليوم: <span id="today-count" class="tracker-count">0/10</span></span>
+                <span class="tracker-text">المحفظة اليوم: <span id="today-count" class="tracker-count">0 / 10</span></span>
             </div>
 
             <div id="card-section">
@@ -355,18 +356,18 @@
 
                 <div class="delete-action-wrapper">
                     <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة</button>
-                    <button class="btn-delete btn-clear-all" onclick="clearAllData()">⚠️ تصغير وتصفير الذاكرة بالكامل</button>
+                    <button class="btn-delete btn-clear-all" onclick="clearAllData()">⚠️ تصفير الذاكرة</button>
                 </div>
             </div>
 
             <div id="empty-view" class="empty-state" style="display: none;">
-                أحسنت! لا توجد كلمات للمراجعة حالياً. ارفع ملفك الفعلي بالأسفل لسحب الكلمات فوراً.
+                أحسنت! لا توجد كلمات للمراجعة حالياً. ارفع ملفك بالأسفل.
             </div>
 
             <div class="add-word-form">
                 <div class="form-title">// استيراد ملف الكلمات (MyActivity.html)</div>
                 <div class="import-box" onclick="document.getElementById('google-file').click()">
-                    <p id="import-box-text">اضغط هنا لرفع ملفك الحقيقي<br>سيتم سحب وترجمة الكلمات المصفّاة تماماً مثل foyer و Biology.</p>
+                    <p id="import-box-text">ضع ملفك هنا</p>
                     <div id="import-status" class="import-status"></div>
                     <input type="file" id="google-file" accept=".html" onchange="importGoogleHistory(event)">
                 </div>
@@ -433,7 +434,9 @@
             
             const todayStr = new Date().toDateString();
             const addedToday = cards.filter(card => card.id && new Date(card.id).toDateString() === todayStr).length;
-            document.getElementById('today-count').innerText = `${addedToday}/${dailyGoalSetting}`;
+            
+            let displayGoal = dailyGoalSetting === "99999" ? "∞" : dailyGoalSetting;
+            document.getElementById('today-count').innerText = `${addedToday} / ${displayGoal}`;
 
             if (queue.length === 0) {
                 document.getElementById('card-section').style.display = 'none';
@@ -471,7 +474,7 @@
                     </div>
                     <div class="action-side">
                         <span class="status-dot ${item.status === 'easy' ? 'status-easy' : 'status-hard'}"></span>
-                        <button class="sidebar-item-del" onclick="deleteFromSidebar(${index})" title="حذف من السجل">✕</button>
+                        <button class="sidebar-item-del" onclick="deleteFromSidebar(${index})">✕</button>
                     </div>
                 </div>
             `).reverse().join('');
@@ -485,25 +488,19 @@
 
         function deleteCurrentCard() {
             if (currentCardIndex === -1) return;
-            if (confirm("هل أنت متأكد من حذف هذه البطاقة نهائياً؟")) {
-                cards.splice(currentCardIndex, 1);
-                saveToStorage();
-                updateUI();
-            }
+            cards.splice(currentCardIndex, 1);
+            saveToStorage();
+            updateUI();
         }
 
-        // دالة تصفير كاملة للتخلص من كل مخلفات الكروت القديمة الخاطئة دفعة واحدة
         function clearAllData() {
-            if (confirm("سيتم تصفير كافة الكروت المخزنة الحالية وسجل المراجعة تماماً للبدء بملفك الجديد بشكل نظيف. هل أنت متأكد؟")) {
-                cards = [];
-                reviewedTodayLog = [];
-                localStorage.clear();
-                saveToStorage();
-                updateUI();
-            }
+            cards = [];
+            reviewedTodayLog = [];
+            localStorage.clear();
+            saveToStorage();
+            updateUI();
         }
 
-        // الدالة المعدلة بدقة فائقة لقراءة ملفك الحقيقي ومعالجة نصوص علامات التنصيص
         async function importGoogleHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -511,7 +508,7 @@
             const statusElement = document.getElementById('import-status');
             statusElement.style.display = 'block';
             statusElement.style.color = '#FFFFFF';
-            statusElement.innerText = "جاري قراءة وتحليل ملف النشاط الفعلي...";
+            statusElement.innerText = "جاري الاستخراج...";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -527,12 +524,13 @@
                     const href = link.getAttribute('href') || "";
                     
                     if (textContent) {
-                        // حل المشكلة الجوهرية: تنظيف وتنقية النصوص من صيغ علامات التنصيص المترجمة (مثل &quot; أو "foyer")
+                        // تنظيف الفلتر لإخراج الكلمة الصافية النقيّة فقط من قوقل
                         let cleanWord = textContent.replace(/[\"\'\“\”\„\‟&quot;]/g, '').trim();
+                        
+                        // حذف أي نصوص مرافقة متبقية من سحب الروابط لتبقى الكلمة الإنجليزية فقط
+                        cleanWord = cleanWord.replace(/Translated\s+/gi, '').replace(/[\.\,\:\?]/g, '').trim();
 
-                        // التحقق من الرابط: قوقل تضع الكلمات إما داخل نطاق البحث أو المترجم المباشر
                         if (href.includes('translate.google.com') || href.includes('google.com/search')) {
-                            // قبول الكلمات الحقيقية المفردة المكونة من حروف إنجليزية فقط لضمان جلب foyer و Biology
                             if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord) && cleanWord.length < 30) {
                                 if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
                                     wordsToTranslate.push(cleanWord);
@@ -544,11 +542,11 @@
 
                 if (wordsToTranslate.length === 0) {
                     statusElement.style.color = 'var(--nothing-red)';
-                    statusElement.innerText = "لم يتم العثور على كلمات جديدة صالحة داخل الملف.";
+                    statusElement.innerText = "لم يتم العثور على كلمات جديدة.";
                     return;
                 }
 
-                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة نقية. جاري ترجمتها وحفظها...`;
+                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة. جاري الترجمة...`;
                 let importedCount = 0;
 
                 for (let i = 0; i < wordsToTranslate.length; i++) {
@@ -559,25 +557,24 @@
                         let arTranslation = data?.responseData?.translatedText || "معنى مستورد";
                         
                         if (arTranslation.toLowerCase() === enWord.toLowerCase()) {
-                            arTranslation = "يرجى مراجعة المعنى يدوياً";
+                            arTranslation = "تعديل يدوي";
                         }
 
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
                             wordAr: arTranslation,
-                            context: "مستورد من سجل المترجم",
+                            context: "مستورد من السجل",
                             nextReview: new Date().toISOString(),
                             interval: 0
                         });
                         importedCount++;
-                        statusElement.innerText = `جاري استيراد وترجمة الكلمات: (${importedCount}/${wordsToTranslate.length})`;
                     } catch (err) {
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
-                            wordAr: "تعديل المعنى يدوياً",
-                            context: "مستورد من سجل المترجم",
+                            wordAr: "تعديل يدوي",
+                            context: "مستورد من السجل",
                             nextReview: new Date().toISOString(),
                             interval: 0
                         });
@@ -588,9 +585,8 @@
                 if (importedCount > 0) {
                     saveToStorage();
                     updateUI();
-                    statusElement.style.color = '#FFFFFF';
-                    statusElement.innerText = `اكتمل الاستيراد! تم إضافة ${importedCount} كلمة جديدة بنجاح إلى اختباراتك.`;
-                    setTimeout(() => { statusElement.style.display = 'none'; }, 5000);
+                    statusElement.innerText = `تم استيراد ${importedCount} كلمة بنجاح!`;
+                    setTimeout(() => { statusElement.style.display = 'none'; }, 3000);
                 }
             };
             reader.readAsText(file);
@@ -602,7 +598,7 @@
             const suggestionsBox = document.getElementById('suggestions');
             if (!query) { suggestionsBox.style.display = 'none'; return; }
             suggestionsBox.style.display = 'block';
-            suggestionsBox.innerHTML = `<div class="suggestion-loading">جاري البحث عن معاني...</div>`;
+            suggestionsBox.innerHTML = `<div class="suggestion-loading">البحث عن معاني...</div>`;
             typingTimer = setTimeout(() => { fetchSuggestions(query); }, 800);
         }
 
@@ -616,8 +612,8 @@
                         if (data.matches) alternatives = alternatives.concat(data.matches.map(m => m.translation.trim()));
                         const finalOptions = [...new Set(alternatives)].filter(v => v.toLowerCase() !== word.toLowerCase()).slice(0, 4);
                         suggestionsBox.innerHTML = finalOptions.map(t => `<div class="suggestion-item" onclick="selectSuggestion('${t.replace(/'/g, "\\'")}')">${t}</div>`).join('');
-                    } else { suggestionsBox.innerHTML = `<div class="suggestion-loading">اكتب المعنى يدوياً</div>`; }
-                }).catch(() => { suggestionsBox.innerHTML = `<div class="suggestion-loading">خطأ بالاتصال</div>`; });
+                    } else { suggestionsBox.innerHTML = `<div class="suggestion-loading">اكتب يدوياً</div>`; }
+                }).catch(() => { suggestionsBox.innerHTML = `<div class="suggestion-loading">خطأ اتصال</div>`; });
         }
 
         function selectSuggestion(val) { document.getElementById('word-ar').value = val; document.getElementById('suggestions').style.display = 'none'; }
