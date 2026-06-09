@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genichiro Cards // Nothing OS Style</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Vazirmatn:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0B0B0B;
+            --card-bg: #161616;
+            --border-color: #2C2C2C;
+            --text-main: #FFFFFF;
+            --text-muted: #888888;
+            --nothing-red: #FF3B30;
+            --font-tech: 'Space Grotesk', 'Vazirmatn', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-tech);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* تأثير الخلفية المنقطة لـ Nothing OS */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* الهيدر */
+        header {
+            margin-bottom: 3rem;
+            text-align: right;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background-color: var(--nothing-red);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.3rem;
+            letter-spacing: 1px;
+        }
+
+        /* العداد اليومي */
+        .tracker {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tracker-text {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .tracker-count {
+            font-weight: 700;
+            color: var(--text-main);
+            border-bottom: 2px dashed var(--nothing-red);
+        }
+
+        /* منطقة الـ Flashcard */
+        .flashcard-wrapper {
+            perspective: 1000px;
+            margin-bottom: 2rem;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 280px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            cursor: pointer;
+        }
+
+        .flashcard.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .card-front {
+            color: var(--text-main);
+        }
+
+        .card-front .word {
+            font-size: 2.2rem;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .card-front .hint {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            position: absolute;
+            bottom: 1.5rem;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+            border-color: var(--text-muted);
+        }
+
+        .card-back .meaning {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .card-back .context {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            font-style: italic;
+            line-height: 1.5;
+        }
+
+        /* أزرار التحكم والتقييم */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            background: transparent;
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            flex: 1;
+        }
+
+        button:hover {
+            background: var(--text-main);
+            color: var(--bg-color);
+            border-color: var(--text-main);
+        }
+
+        button.btn-easy:hover {
+            background: #FFFFFF;
+            color: #000000;
+        }
+
+        button.btn-hard:hover {
+            background: var(--nothing-red);
+            color: #FFFFFF;
+            border-color: var(--nothing-red);
+        }
+
+        /* فورم إضافة كلمة جديدة */
+        .add-word-form {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 3rem;
+        }
+
+        .form-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+            text-align: right;
+        }
+
+        label {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background: #000000;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 0.7rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--text-main);
+        }
+
+        textarea {
+            resize: vertical;
+            height: 70px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--text-main);
+            color: var(--bg-color);
+            font-weight: 700;
+        }
+
+        .submit-btn:hover {
+            background: transparent;
+            color: var(--text-main);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: var(--text-muted);
+            border: 1px dashed var(--border-color);
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <div class="logo">Genichiro Cards</div>
+            <div class="subtitle">SPACED REPETITION // MEMORY ENGINE</div>
+        </header>
+
+        <div class="tracker">
+            <span class="tracker-text">الكلمات الجاهزة للمراجعة الآن: <span id="review-count" class="tracker-count">0</span></span>
+            <span class="tracker-text">المحفوظة اليوم: <span id="today-count" class="tracker-count">0/5</span></span>
+        </div>
+
+        <div id="card-section">
+            <div class="flashcard-wrapper">
+                <div class="flashcard" id="main-card" onclick="flipCard()">
+                    <div class="card-face card-front">
+                        <div class="word" id="front-word">Anomalous</div>
+                        <div class="hint">اضغط لقلب البطاقة // CLICK TO FLIP</div>
+                    </div>
+                    <div class="card-face card-back">
+                        <div class="meaning" id="back-meaning">شاذ / غير طبيعي</div>
+                        <div class="context" id="back-context">"The lab results showed an anomalous pattern."</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="controls">
+                <button class="btn-hard" onclick="rateWord('hard')">صعبة (تكرار غداً)</button>
+                <button class="btn-easy" onclick="rateWord('easy')">سهلة (بعد 4 أيام)</button>
+            </div>
+        </div>
+
+        <div id="empty-view" class="empty-state" style="display: none;">
+            لا توجد كلمات للمراجعة حالياً. أضف كلمات جديدة بالأسفل لتنصيب النظام الذكي.
+        </div>
+
+        <div class="add-word-form">
+            <div class="form-title">// إضافة مفردة جديدة</div>
+            <form id="word-form" onsubmit="addNewWord(event)">
+                <div class="input-group">
+                    <label for="word-en">الكلمة الإنجليزية (English Word)</label>
+                    <input type="text" id="word-en" required placeholder="e.g., Paradox" dir="ltr">
+                </div>
+                <div class="input-group">
+                    <label for="word-ar">المعنى بالعربي</label>
+                    <input type="text" id="word-ar" required placeholder="مثال: مفارقة / تناقض ظاهري">
+                </div>
+                <div class="input-group">
+                    <label for="word-context">السياق أو جملة مساعدة (اختياري)</label>
+                    <textarea id="word-context" placeholder="مثال: It's a paradox that more choices can make us less happy." dir="ltr"></textarea>
+                </div>
+                <button type="submit" class="submit-btn">إدراج في الذاكرة +</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // مصفوفة حفظ الكلمات والعداد اليومي في الـ LocalStorage
+        let cards = JSON.parse(localStorage.getItem('genichiro_cards')) || [];
+        let currentCardIndex = -1;
+
+        // تهيئة البيانات الافتراضية إذا كان التطبيق فارغاً تماماً لأول مرة
+        if (cards.length === 0) {
+            cards = [
+                {
+                    id: 1,
+                    wordEn: "Subtle",
+                    wordAr: "دقيق / خفي / غير واضح مباشرة",
+                    context: "Nothing OS design has subtle details that make it beautiful.",
+                    nextReview: new Date().toISOString(),
+                    interval: 1
+                }
+            ];
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('genichiro_cards', JSON.stringify(cards));
+        }
+
+        function flipCard() {
+            document.getElementById('main-card').classList.toggle('flipped');
+        }
+
+        // فلترة الكلمات التي حان وقت مراجعتها (تاريخها أصغر أو يساوي وقتنا الحالي)
+        function getReviewQueue() {
+            const now = new Date();
+            return cards.filter(card => new Date(card.nextReview) <= now);
+        }
+
+        function updateUI() {
+            const queue = getReviewQueue();
+            document.getElementById('review-count').innerText = queue.length;
+            
+            // حساب الكلمات المضافة اليوم
+            const todayStr = new Date().toDateString();
+            const addedToday = cards.filter(card => {
+                // نستخدم آي دي كـ timestamp لمعرفة وقت الإنشاء
+                if(card.id) {
+                    return new Date(card.id).toDateString() === todayStr;
+                }
+                return false;
+            }).length;
+            document.getElementById('today-count').innerText = `${addedToday}/5`;
+
+            if (queue.length === 0) {
+                document.getElementById('card-section').style.display = 'none';
+                document.getElementById('empty-view').style.display = 'block';
+                currentCardIndex = -1;
+            } else {
+                document.getElementById('card-section').style.display = 'block';
+                document.getElementById('empty-view').style.display = 'none';
+                
+                // عرض أول بطاقة في طابور الانتظار
+                const currentCard = queue[0];
+                currentCardIndex = cards.findIndex(c => c.id === currentCard.id);
+                
+                // إعادة الكرت لوضعه الأصلي قبل تغيير النص
+                document.getElementById('main-card').classList.remove('flipped');
+                
+                setTimeout(() => {
+                    document.getElementById('front-word').innerText = currentCard.wordEn;
+                    document.getElementById('back-meaning').innerText = currentCard.wordAr;
+                    document.getElementById('back-context').innerText = currentCard.context ? `"${currentCard.context}"` : '';
+                }, 150);
+            }
+        }
+
+        // معالجة الخوارزمية الذكية عند ضغط الأزرار
+        function rateWord(rating) {
+            if (currentCardIndex === -1) return;
+            
+            const card = cards[currentCardIndex];
+            const now = new Date();
+
+            if (rating === 'easy') {
+                // الكلمة سهلة: تظهر بعد 4 أيام أول مرة، وإذا تكررت سهولتها نضاعف المدة (أسبوعين ثم شهر)
+                if (!card.interval || card.interval < 4) {
+                    card.interval = 4; // 4 أيام
+                } else if (card.interval === 4) {
+                    card.interval = 14; // أسبوعين
+                } else {
+                    card.interval = 30; // شهر
+                }
+                now.setDate(now.getDate() + card.interval);
+            } else if (rating === 'hard') {
+                // الكلمة صعبة: ترجع تظهر له بكره (بعد يوم واحد) وتصفير العداد لتبدأ من جديد
+                card.interval = 1;
+                now.setDate(now.getDate() + 1);
+            }
+
+            card.nextReview = now.toISOString();
+            saveToStorage();
+            updateUI();
+        }
+
+        // إضافة كلمة جديدة من الفورم
+        function addNewWord(e) {
+            e.preventDefault();
+            
+            const wordEn = document.getElementById('word-en').value.trim();
+            const wordAr = document.getElementById('word-ar').value.trim();
+            const context = document.getElementById('word-context').value.trim();
+            
+            const newCard = {
+                id: Date.now(), // استخدام التوقيت كمعرف فريد وقت الإنشاء
+                wordEn: wordEn,
+                wordAr: wordAr,
+                context: context,
+                nextReview: new Date().toISOString(), // تظهر فوراً للمراجعة
+                interval: 0
+            };
+            
+            cards.push(newCard);
+            saveToStorage();
+            
+            // تصفير الخانات
+            document.getElementById('word-form').reset();
+            
+            // تحديث الواجهة
+            updateUI();
+        }
+
+        // التشغيل الأولي عند فتح الصفحة
+        window.onload = updateUI;
+    </script>
+</body>
+</html>
