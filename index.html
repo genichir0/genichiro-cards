@@ -233,7 +233,7 @@
         .import-box:hover { border-color: var(--text-main); }
         .import-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
         .import-box input { display: none; }
-        .import-status { font-size: 0.85rem; color: var(--nothing-red); margin-top: 0.6rem; display: none; font-weight: 500; }
+        .import-status { font-size: 0.85rem; color: var(--text-main); margin-top: 0.6rem; display: none; font-weight: 500; }
 
         .flashcard-wrapper { perspective: 1000px; width: 100%; }
         .flashcard { width: 100%; height: 220px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
@@ -257,6 +257,11 @@
         button { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.9rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s ease; flex: 1; -webkit-tap-highlight-color: transparent; }
         button:hover { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
         button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
+
+        /* تنسيق زر الحذف المطور */
+        .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; }
+        .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.3); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-delete:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
 
         .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px; position: relative; }
         .form-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
@@ -341,6 +346,10 @@
                     <button class="btn-hard" onclick="rateWord('hard')">صعبة (غداً)</button>
                     <button class="btn-easy" onclick="rateWord('easy')">سهلة (بعد 4 أيام)</button>
                 </div>
+
+                <div class="delete-action-wrapper">
+                    <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة نهائياً</button>
+                </div>
             </div>
 
             <div id="empty-view" class="empty-state" style="display: none;">
@@ -348,9 +357,9 @@
             </div>
 
             <div class="add-word-form">
-                <div class="form-title">// استيراد روابط الكلمات الزرقاء فقط</div>
+                <div class="form-title">// استيراد الكلمات من سجل المترجم</div>
                 <div class="import-box" onclick="document.getElementById('google-file').click()">
-                    <p id="import-box-text">اضغط هنا لرفع ملف (MyActivity.html)<br>سيتم سحب وترجمة الكلمات الملونة بالأزرق فقط وعزل الأكواد البرمجية.</p>
+                    <p id="import-box-text">اضغط هنا لرفع ملفك (MyActivity.html)<br>سيقوم النظام بفصل الكلمات المترجمة وحفظها وتجاهل الأكواد تماماً.</p>
                     <div id="import-status" class="import-status"></div>
                     <input type="file" id="google-file" accept=".html" onchange="importGoogleHistory(event)">
                 </div>
@@ -456,7 +465,17 @@
             `).reverse().join('');
         }
 
-        // الدالة المعدلة بدقة لاستهداف الروابط الزرقاء فقط وعزل الأكواد
+        // دالة مخصصة لحذف الكرت الحالي نهائياً من الـ LocalStorage
+        function deleteCurrentCard() {
+            if (currentCardIndex === -1) return;
+            if (confirm("هل أنت متأكد من حذف هذه البطاقة نهائياً؟")) {
+                cards.splice(currentCardIndex, 1);
+                saveToStorage();
+                updateUI();
+            }
+        }
+
+        // دالة استيراد احترافية ومفلترة وخالية من رسائل الخطأ الغريبة
         async function importGoogleHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -464,32 +483,24 @@
             const statusElement = document.getElementById('import-status');
             statusElement.style.display = 'block';
             statusElement.style.color = '#FFFFFF';
-            statusElement.innerText = "جاري تصفية الكلمات الزرقاء وعزل الأكواد...";
+            statusElement.innerText = "جاري تصفية وتحليل ملف النشاط...";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const text = e.target.result;
                 let wordsToTranslate = [];
 
-                // استخدام الـ DOMParser المدمج بالمتصفح لقراءة بنية الصفحة تماماً
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(text, 'text/html');
-                
-                // البحث عن عناصر الروابط التشعبية <a> التي تضعها قوقل للكلمات المترجمة في السجل
-                // الروابط داخل نص يبدأ بـ "Translated" أو داخل حاويات الأنشطة
                 const links = doc.querySelectorAll('a');
                 
                 links.forEach(link => {
                     let cleanWord = link.textContent ? link.textContent.trim() : "";
+                    const href = link.getAttribute('href') || "";
                     
-                    // شروط صارمة للتأكد أنها كلمة حقيقية:
-                    // 1. تحتوي على حروف إنجليزية فقط
-                    // 2. لا تحتوي على مسافات (كلمة واحدة مفردة)
-                    // 3. الرابط لا يشير إلى صفحة خارجية عامة مثل شروط الخدمة (لا يحتوي على settings أو google.com/history)
-                    if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord)) {
-                        const href = link.getAttribute('href') || "";
-                        if (!href.includes('settings') && !href.includes('myaccount') && cleanWord.length < 25) {
-                            // تجنب التكرار داخل المصفوفة أو داخل الكروت المخزنة مسبقاً
+                    // شروط تضمن تصفية الكلمات الحقيقية المترجمة واستبعاد الأكواد أو الروابط المرجعية وقيم التنسيق
+                    if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord) && !cleanWord.includes(' ')) {
+                        if (href.includes('translate.google.com') && cleanWord.length < 25) {
                             if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
                                 wordsToTranslate.push(cleanWord);
                             }
@@ -499,14 +510,13 @@
 
                 if (wordsToTranslate.length === 0) {
                     statusElement.style.color = 'var(--nothing-red)';
-                    statusElement.innerText = "لم يتم العثور على كلمات زرقاء جديدة غير مكررة بالملف.";
+                    statusElement.innerText = "لم يتم العثور على كلمات جديدة غير مكررة داخل الملف.";
                     return;
                 }
 
-                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة زرقاء حقيقية. جاري ترجمتها وحفظها...`;
+                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة جديدة. جاري استيراد وترجمة الكلمات...`;
                 let importedCount = 0;
 
-                // ترجمة وحفظ الكلمات المصفّاة
                 for (let i = 0; i < wordsToTranslate.length; i++) {
                     const enWord = wordsToTranslate[i];
                     try {
@@ -515,25 +525,25 @@
                         let arTranslation = data?.responseData?.translatedText || "معنى مستورد";
                         
                         if (arTranslation.toLowerCase() === enWord.toLowerCase()) {
-                            arTranslation = "اضغط لتعديل المعنى يدوياً";
+                            arTranslation = "يرجى مراجعة المعنى يدوياً";
                         }
 
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
                             wordAr: arTranslation,
-                            context: "مستورد من الكلمات الزرقاء في سجل قوقل",
+                            context: "مستورد من سجل المترجم",
                             nextReview: new Date().toISOString(),
                             interval: 0
                         });
                         importedCount++;
-                        statusElement.innerText = `جاري جلب المعاني: (${importedCount}/${wordsToTranslate.length})`;
+                        statusElement.innerText = `جاري استيراد وترجمة الكلمات: (${importedCount}/${wordsToTranslate.length})`;
                     } catch (err) {
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
-                            wordAr: "اضغط لتعديل المعنى",
-                            context: "مستورد من سجل قوقل",
+                            wordAr: "تعديل المعنى يدوياً",
+                            context: "مستورد من سجل المترجم",
                             nextReview: new Date().toISOString(),
                             interval: 0
                         });
@@ -544,8 +554,8 @@
                 if (importedCount > 0) {
                     saveToStorage();
                     updateUI();
-                    statusElement.style.color = '#34C759';
-                    statusElement.innerText = `اكتمل بنجاح! تم استيراد وترجمة ${importedCount} كلمة زرقاء بنجاح.`;
+                    statusElement.style.color = '#FFFFFF';
+                    statusElement.innerText = `اكتمل الاستيراد! تم إضافة ${importedCount} كلمة جديدة بنجاح إلى اختباراتك.`;
                     setTimeout(() => { statusElement.style.display = 'none'; }, 5000);
                 }
             };
