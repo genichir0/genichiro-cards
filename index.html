@@ -217,13 +217,13 @@
         .tracker-count { font-weight: 700; color: var(--text-main); border-bottom: 2px dashed var(--nothing-red); }
 
         .goal-selector { display: flex; align-items: center; gap: 6px; }
-        .goal-selector label { font-size: 0.75rem; color: var(--text-muted); }
+        .goal-selector label { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0; }
         .goal-select { background: #000000; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; outline: none; cursor: pointer; }
 
         .import-box {
             background: #000000;
             border: 2px dashed var(--border-color);
-            padding: 1.2rem;
+            padding: 1.5rem 1.2rem;
             border-radius: 6px;
             text-align: center;
             margin-bottom: 1rem;
@@ -231,9 +231,9 @@
             transition: border-color 0.2s ease;
         }
         .import-box:hover { border-color: var(--text-main); }
-        .import-box p { font-size: 0.85rem; color: var(--text-muted); }
+        .import-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
         .import-box input { display: none; }
-        .import-status { font-size: 0.8rem; color: var(--nothing-red); margin-top: 0.5rem; display: none; }
+        .import-status { font-size: 0.85rem; color: var(--nothing-red); margin-top: 0.6rem; display: none; font-weight: 500; }
 
         .flashcard-wrapper { perspective: 1000px; width: 100%; }
         .flashcard { width: 100%; height: 220px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
@@ -348,11 +348,11 @@
             </div>
 
             <div class="add-word-form">
-                <div class="form-title">// استيراد ذكي من سجل مترجم Google</div>
+                <div class="form-title">// استيراد روابط الكلمات الزرقاء فقط</div>
                 <div class="import-box" onclick="document.getElementById('google-file').click()">
-                    <p id="import-box-text">اضغط هنا لرفع ملفك (MyActivity.html) وسيتم ترجمة وجلب كل الكلمات فوراً</p>
+                    <p id="import-box-text">اضغط هنا لرفع ملف (MyActivity.html)<br>سيتم سحب وترجمة الكلمات الملونة بالأزرق فقط وعزل الأكواد البرمجية.</p>
                     <div id="import-status" class="import-status"></div>
-                    <input type="file" id="google-file" accept=".html,.csv" onchange="importGoogleHistory(event)">
+                    <input type="file" id="google-file" accept=".html" onchange="importGoogleHistory(event)">
                 </div>
 
                 <div class="form-title" style="margin-top: 1.5rem;">// إدراج مفردة يدوياً</div>
@@ -456,48 +456,57 @@
             `).reverse().join('');
         }
 
-        // دالة الاستيراد الذكية المحدثة لقراءة نمط MyActivity.html وجلب التراجم فوراً
+        // الدالة المعدلة بدقة لاستهداف الروابط الزرقاء فقط وعزل الأكواد
         async function importGoogleHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const statusElement = document.getElementById('import-status');
-            const boxText = document.getElementById('import-box-text');
             statusElement.style.display = 'block';
             statusElement.style.color = '#FFFFFF';
-            statusElement.innerText = "جاري فحص وتصفية الكلمات من الملف...";
+            statusElement.innerText = "جاري تصفية الكلمات الزرقاء وعزل الأكواد...";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
                 const text = e.target.result;
                 let wordsToTranslate = [];
 
-                if (file.name.endsWith('.html')) {
-                    // نمط ملف MyActivity من قوقل يستعمل علامات تنصيص للكلمات المترجمة مثل "foyer"
-                    const matches = text.match(/"([^"]+)"/g);
-                    if (matches) {
-                        matches.forEach(m => {
-                            let cleanWord = m.replace(/"/g, '').trim();
-                            // التأكد أنها كلمة إنجليزية، ليست طويلة جداً، وليست مكررة بالنظام
-                            if (cleanWord && /[a-zA-Z]/.test(cleanWord) && !cleanWord.includes(' ') && cleanWord.length < 25) {
-                                if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
-                                    wordsToTranslate.push(cleanWord);
-                                }
+                // استخدام الـ DOMParser المدمج بالمتصفح لقراءة بنية الصفحة تماماً
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(text, 'text/html');
+                
+                // البحث عن عناصر الروابط التشعبية <a> التي تضعها قوقل للكلمات المترجمة في السجل
+                // الروابط داخل نص يبدأ بـ "Translated" أو داخل حاويات الأنشطة
+                const links = doc.querySelectorAll('a');
+                
+                links.forEach(link => {
+                    let cleanWord = link.textContent ? link.textContent.trim() : "";
+                    
+                    // شروط صارمة للتأكد أنها كلمة حقيقية:
+                    // 1. تحتوي على حروف إنجليزية فقط
+                    // 2. لا تحتوي على مسافات (كلمة واحدة مفردة)
+                    // 3. الرابط لا يشير إلى صفحة خارجية عامة مثل شروط الخدمة (لا يحتوي على settings أو google.com/history)
+                    if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord)) {
+                        const href = link.getAttribute('href') || "";
+                        if (!href.includes('settings') && !href.includes('myaccount') && cleanWord.length < 25) {
+                            // تجنب التكرار داخل المصفوفة أو داخل الكروت المخزنة مسبقاً
+                            if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
+                                wordsToTranslate.push(cleanWord);
                             }
-                        });
+                        }
                     }
-                }
+                });
 
                 if (wordsToTranslate.length === 0) {
                     statusElement.style.color = 'var(--nothing-red)';
-                    statusElement.innerText = "لم يتم العثور على كلمات إنجليزية جديدة بالملف.";
+                    statusElement.innerText = "لم يتم العثور على كلمات زرقاء جديدة غير مكررة بالملف.";
                     return;
                 }
 
-                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة. جاري جلب معانيها تلقائياً بالخلفية...`;
+                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة زرقاء حقيقية. جاري ترجمتها وحفظها...`;
                 let importedCount = 0;
 
-                // جلب التراجم من الـ API على دفعات متتالية سريعة
+                // ترجمة وحفظ الكلمات المصفّاة
                 for (let i = 0; i < wordsToTranslate.length; i++) {
                     const enWord = wordsToTranslate[i];
                     try {
@@ -505,27 +514,25 @@
                         const data = await response.json();
                         let arTranslation = data?.responseData?.translatedText || "معنى مستورد";
                         
-                        // تنظيف النص في حال أعادت الـ API نفس الكلمة
                         if (arTranslation.toLowerCase() === enWord.toLowerCase()) {
-                            arTranslation = "راجع القاموس لمعناها";
+                            arTranslation = "اضغط لتعديل المعنى يدوياً";
                         }
 
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
                             wordAr: arTranslation,
-                            context: "مستورد ومترجم تلقائياً من سجل قوقل",
+                            context: "مستورد من الكلمات الزرقاء في سجل قوقل",
                             nextReview: new Date().toISOString(),
                             interval: 0
                         });
                         importedCount++;
-                        statusElement.innerText = `جاري استيراد وترجمة الكلمات: (${importedCount}/${wordsToTranslate.length})`;
+                        statusElement.innerText = `جاري جلب المعاني: (${importedCount}/${wordsToTranslate.length})`;
                     } catch (err) {
-                        // في حال حدوث خطأ بالاتصال لبعض الكلمات نضع معنى افتراضي لتعديله لاحقاً
                         cards.push({
                             id: Date.now() + i,
                             wordEn: enWord,
-                            wordAr: "اضغط لتعديل المعنى يدوياً",
+                            wordAr: "اضغط لتعديل المعنى",
                             context: "مستورد من سجل قوقل",
                             nextReview: new Date().toISOString(),
                             interval: 0
@@ -538,7 +545,7 @@
                     saveToStorage();
                     updateUI();
                     statusElement.style.color = '#34C759';
-                    statusElement.innerText = `اكتمل الاستيراد! تم إضافة ${importedCount} كلمة بنجاح إلى اختباراتك.`;
+                    statusElement.innerText = `اكتمل بنجاح! تم استيراد وترجمة ${importedCount} كلمة زرقاء بنجاح.`;
                     setTimeout(() => { statusElement.style.display = 'none'; }, 5000);
                 }
             };
