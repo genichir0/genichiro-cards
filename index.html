@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genichiro Cards // Nothing OS Edition</title>
     
-    <!-- تم التعديل لتتوافق مع ملف icon.png العندك تماماً -->
+    <!-- أيقونة التبويب العلوية (Favicon) -->
     <link rel="icon" type="image/png" href="icon.png">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,12 +33,16 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-main);
-            padding: 2rem;
+            padding: 1rem; /* تقليل البادينغ على الجوال لزيادة المساحة المتاحة */
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+        }
+
+        @media (min-width: 768px) {
+            body { padding: 2rem; }
         }
 
         body::before {
@@ -55,19 +59,23 @@
             width: 100%;
             max-width: 1100px;
             display: grid;
-            grid-template-columns: 320px 1fr;
-            gap: 2.5rem;
-            margin-top: 2rem;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1rem;
         }
 
-        @media (max-width: 850px) {
-            .app-layout { grid-template-columns: 1fr; }
-            .sidebar { order: 2; }
+        /* توزيع العناصر على الشاشات الكبيرة للكمبيوتر */
+        @media (min-width: 850px) {
+            .app-layout { 
+                grid-template-columns: 320px 1fr; 
+                gap: 2.5rem;
+                margin-top: 2rem;
+            }
         }
 
         header {
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
             width: 100%;
             display: flex;
             flex-direction: column;
@@ -79,12 +87,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 12px;
         }
 
         .brand-icon {
-            width: 48px;
-            height: 48px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             border: 1px solid var(--border-color);
             object-fit: cover;
@@ -92,20 +100,29 @@
             display: block;
         }
 
+        @media (min-width: 768px) {
+            .brand-icon { width: 48px; height: 48px; }
+            .brand-container { gap: 16px; }
+        }
+
         .logo {
-            font-size: 2.2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             letter-spacing: -1px;
             text-transform: uppercase;
             display: inline-flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
+        }
+
+        @media (min-width: 768px) {
+            .logo { font-size: 2.2rem; gap: 10px; }
         }
 
         .logo::after {
             content: "";
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
             background-color: var(--nothing-red);
             border-radius: 50%;
             display: inline-block;
@@ -113,29 +130,41 @@
 
         .subtitle {
             color: var(--text-muted);
-            font-size: 0.85rem;
-            margin-top: 0.6rem;
-            letter-spacing: 2px;
+            font-size: 0.75rem;
+            margin-top: 0.4rem;
+            letter-spacing: 1px;
         }
 
-        /* القائمة الجانبية */
+        @media (min-width: 768px) {
+            .subtitle { font-size: 0.85rem; margin-top: 0.6rem; letter-spacing: 2px; }
+        }
+
+        /* تحسين القائمة الجانبية لتناسب الجوال والكمبيوتر */
         .sidebar {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 1.5rem;
+            padding: 1.2rem;
             display: flex;
             flex-direction: column;
-            height: 600px;
+            max-height: 220px; /* تحديد الارتفاع على الجوال حتى لا تستهلك مساحة عمودية ضخمة */
+        }
+
+        @media (min-width: 850px) {
+            .sidebar { 
+                height: 600px; 
+                max-height: none;
+                padding: 1.5rem;
+            }
         }
 
         .sidebar-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: 700;
             letter-spacing: 1px;
-            margin-bottom: 1rem;
+            margin-bottom: 0.8rem;
             border-bottom: 1px solid var(--border-color);
-            padding-bottom: 0.8rem;
+            padding-bottom: 0.6rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -152,19 +181,19 @@
         .reviewed-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
         .reviewed-item {
-            padding: 0.8rem;
+            padding: 0.7rem;
             border: 1px solid var(--border-color);
             background: #000000;
             border-radius: 4px;
-            margin-bottom: 0.7rem;
+            margin-bottom: 0.5rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .reviewed-item .en { font-weight: 700; letter-spacing: -0.5px; }
-        .reviewed-item .ar { color: var(--text-muted); font-size: 0.8rem; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .reviewed-item .ar { color: var(--text-muted); font-size: 0.75rem; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
         .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
         .status-easy { background-color: #FFFFFF; }
@@ -174,63 +203,82 @@
         .main-content {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 1.2rem;
+        }
+
+        @media (min-width: 768px) {
+            .main-content { gap: 1.5rem; }
         }
 
         .tracker {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 1rem 1.5rem;
+            padding: 1rem 1.2rem;
             border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 1rem;
+            gap: 0.8rem;
         }
 
-        .tracker-text { font-size: 0.9rem; color: var(--text-muted); }
+        .tracker-text { font-size: 0.85rem; color: var(--text-muted); }
         .tracker-count { font-weight: 700; color: var(--text-main); border-bottom: 2px dashed var(--nothing-red); }
 
-        .goal-selector { display: flex; align-items: center; gap: 8px; }
-        .goal-selector label { font-size: 0.8rem; color: var(--text-muted); }
-        .goal-select { background: #000000; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 700; outline: none; cursor: pointer; }
+        .goal-selector { display: flex; align-items: center; gap: 6px; }
+        .goal-selector label { font-size: 0.75rem; color: var(--text-muted); }
+        .goal-select { background: #000000; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 700; font-size: 0.8rem; outline: none; cursor: pointer; }
 
-        /* كرت الفلاش كارد */
-        .flashcard-wrapper { perspective: 1000px; }
-        .flashcard { width: 100%; height: 260px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+        /* كرت الفلاش كارد المستجيب للجوال */
+        .flashcard-wrapper { perspective: 1000px; width: 100%; }
+        .flashcard { width: 100%; height: 220px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+        
+        @media (min-width: 768px) {
+            .flashcard { height: 260px; }
+        }
+        
         .flashcard.flipped { transform: rotateY(180deg); }
         
         .card-face {
             position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
             border: 1px solid var(--border-color); background: var(--card-bg); border-radius: 8px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center;
         }
 
-        .card-front .word { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.5px; }
-        .card-front .hint { font-size: 0.75rem; color: var(--text-muted); position: absolute; bottom: 1.2rem; letter-spacing: 1px; }
-        .card-back { transform: rotateY(180deg); border-color: var(--text-muted); }
-        .card-back .meaning { font-size: 1.8rem; font-weight: 500; margin-bottom: 0.8rem; }
-        .card-back .context { font-size: 0.9rem; color: var(--text-muted); font-style: italic; line-height: 1.5; max-width: 90%; }
+        .card-front .word { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; word-break: break-word; }
+        @media (min-width: 768px) { .card-front .word { font-size: 2.4rem; } }
 
-        .controls { display: flex; gap: 1rem; }
-        button { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.8rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; flex: 1; }
+        .card-front .hint { font-size: 0.7rem; color: var(--text-muted); position: absolute; bottom: 1rem; letter-spacing: 1px; }
+        .card-back { transform: rotateY(180deg); border-color: var(--text-muted); }
+        .card-back .meaning { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.6rem; word-break: break-word; }
+        @media (min-width: 768px) { .card-back .meaning { font-size: 1.8rem; } }
+
+        .card-back .context { font-size: 0.85rem; color: var(--text-muted); font-style: italic; line-height: 1.4; max-width: 95%; word-break: break-word; }
+
+        /* أزرار مريحة للضغط بالإبهام على الجوال */
+        .controls { display: flex; gap: 0.8rem; margin-top: 1rem; width: 100%; }
+        button { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.9rem 1.2rem; border-radius: 4px; cursor: pointer; font-weight: 700; font-size: 0.85rem; transition: all 0.2s ease; flex: 1; -webkit-tap-highlight-color: transparent; }
+        @media (min-width: 768px) {
+            button { padding: 0.8rem 1.5rem; font-size: 0.9rem; }
+        }
         button:hover { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
         button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
 
-        /* فورم الإدخال */
-        .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; position: relative; }
-        .form-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
+        /* فورم الإدخال المطور */
+        .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px; position: relative; }
+        @media (min-width: 768px) { .add-word-form { padding: 1.5rem; } }
+
+        .form-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
         .input-group { margin-bottom: 1rem; text-align: right; position: relative; }
-        label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+        label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
         
         input[type="text"], textarea {
             width: 100%; background: #000000; border: 1px solid var(--border-color);
-            color: var(--text-main); padding: 0.7rem; border-radius: 4px; font-size: 0.95rem;
+            color: var(--text-main); padding: 0.7rem; border-radius: 4px; font-size: 0.9rem; -webkit-appearance: none;
         }
         input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--text-main); }
         textarea { resize: vertical; height: 65px; }
-        .submit-btn { width: 100%; background: var(--text-main); color: var(--bg-color); font-weight: 700; }
+        .submit-btn { width: 100%; background: var(--text-main); color: var(--bg-color); font-weight: 700; margin-top: 0.5rem; }
         .submit-btn:hover { background: transparent; color: var(--text-main); }
 
         .suggestions-box {
@@ -242,19 +290,17 @@
         .suggestion-item {
             padding: 0.6rem 1rem; text-align: right; font-size: 0.85rem;
             color: var(--text-main); cursor: pointer; border-bottom: 1px solid #1a1a1a;
-            transition: background 0.2s;
         }
         .suggestion-item:hover { background: var(--border-color); }
         .suggestion-loading { padding: 0.6rem 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: right; }
 
-        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 8px; font-size: 0.95rem; }
+        .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 8px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
 
     <header>
         <div class="brand-container">
-            <!-- تم التحديث هنا أيضاً ليكون مسار الصورة الصحيح icon.png -->
             <img src="icon.png" alt="Genichiro Logo" class="brand-icon">
             <div class="logo">Genichiro Cards</div>
         </div>
@@ -263,14 +309,14 @@
 
     <div class="app-layout">
         
-        <!-- العمود الأيسر -->
+        <!-- العمود الأيسر (يظهر بالملخص أولاً أو ثانياً بناءً على الشاشة) -->
         <div class="sidebar">
             <div class="sidebar-title">
                 <span>// تمت مراجعتها اليوم</span>
                 <span id="reviewed-count-badge" style="color: var(--text-muted); font-size: 0.8rem;">(0)</span>
             </div>
             <div class="reviewed-list" id="reviewed-list-container">
-                <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">لم تراجع أي كرت بعد.</div>
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 1.5rem;">لم تراجع أي كرت بعد.</div>
             </div>
         </div>
 
@@ -306,8 +352,8 @@
                     </div>
                 </div>
 
-                <div class="controls" style="margin-top: 1rem;">
-                    <button class="btn-hard" onclick="rateWord('hard')">صعبة (تكرار غداً)</button>
+                <div class="controls">
+                    <button class="btn-hard" onclick="rateWord('hard')">صعبة (غداً)</button>
                     <button class="btn-easy" onclick="rateWord('easy')">سهلة (بعد 4 أيام)</button>
                 </div>
             </div>
@@ -328,12 +374,12 @@
                     
                     <div class="input-group">
                         <label for="word-ar">المعنى بالعربي</label>
-                        <input type="text" id="word-ar" required placeholder="اكتب المعنى هنا أو اختر من الاقتراحات في الأعلى">
+                        <input type="text" id="word-ar" required placeholder="اكتب المعنى هنا أو اختر من الاقتراحات">
                     </div>
                     
                     <div class="input-group">
                         <label for="word-context">السياق أو جملة مساعدة (اختياري)</label>
-                        <textarea id="word-context" placeholder="مثال: The internet created a paradigm shift in how we communicate." dir="ltr"></textarea>
+                        <textarea id="word-context" placeholder="مثال: The internet created a paradigm shift." dir="ltr"></textarea>
                     </div>
                     <button type="submit" class="submit-btn">تثبيت في الذاكرة +</button>
                 </form>
@@ -424,7 +470,7 @@
             document.getElementById('reviewed-count-badge').innerText = `(${reviewedTodayLog.length})`;
             
             if (reviewedTodayLog.length === 0) {
-                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">لم تراجع أي كرت بعد.</div>`;
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 1.5rem;">لم تراجع أي كرت بعد.</div>`;
                 return;
             }
             container.innerHTML = reviewedTodayLog.map(item => `
