@@ -140,7 +140,7 @@
             padding: 1.2rem;
             display: flex;
             flex-direction: column;
-            max-height: 220px;
+            max-height: 250px;
         }
 
         @media (min-width: 850px) {
@@ -184,12 +184,18 @@
             font-size: 0.85rem;
         }
 
-        .reviewed-item .en { font-weight: 700; letter-spacing: -0.5px; }
-        .reviewed-item .ar { color: var(--text-muted); font-size: 0.75rem; max-width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .reviewed-item .info-side { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .reviewed-item .en { font-weight: 700; letter-spacing: -0.5px; white-space: nowrap; }
+        .reviewed-item .ar { color: var(--text-muted); font-size: 0.75rem; max-width: 90px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+        .action-side { display: flex; align-items: center; gap: 8px; }
         .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
         .status-easy { background-color: #FFFFFF; }
         .status-hard { background-color: var(--nothing-red); }
+        
+        /* زر حذف مراجعة معينة */
+        .sidebar-item-del { background: transparent; border: none; color: var(--nothing-red); font-size: 0.85rem; cursor: pointer; padding: 2px 6px; opacity: 0.6; transition: opacity 0.2s; }
+        .sidebar-item-del:hover { opacity: 1; background: transparent; color: var(--nothing-red); }
 
         .main-content {
             display: flex;
@@ -258,7 +264,6 @@
         button:hover { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
         button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
 
-        /* تنسيق زر الحذف المطور */
         .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; }
         .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.3); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
         .btn-delete:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
@@ -348,18 +353,18 @@
                 </div>
 
                 <div class="delete-action-wrapper">
-                    <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة نهائياً</button>
+                    <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة من المراجعة</button>
                 </div>
             </div>
 
             <div id="empty-view" class="empty-state" style="display: none;">
-                أحسنت! لا توجد كلمات للمراجعة حالياً. أضف كلمات بالأسفل أو استورد ملف سجل قوقل.
+                أحسنت! لا توجد كلمات للمراجعة حالياً. أضف كلمات بالأسفل أو استورد ملف سجل قوقل الجديد.
             </div>
 
             <div class="add-word-form">
-                <div class="form-title">// استيراد الكلمات من سجل المترجم</div>
+                <div class="form-title">// استيراد ملف الكلمات الجديد المصفى</div>
                 <div class="import-box" onclick="document.getElementById('google-file').click()">
-                    <p id="import-box-text">اضغط هنا لرفع ملفك (MyActivity.html)<br>سيقوم النظام بفصل الكلمات المترجمة وحفظها وتجاهل الأكواد تماماً.</p>
+                    <p id="import-box-text">اضغط هنا لرفع ملفك (MyActivity.html)<br>سيتم استخراج الكلمات التي قمت بترجمتها بدقة متناهية.</p>
                     <div id="import-status" class="import-status"></div>
                     <input type="file" id="google-file" accept=".html" onchange="importGoogleHistory(event)">
                 </div>
@@ -456,16 +461,27 @@
                 container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 1.5rem;">لم تراجع أي كرت بعد.</div>`;
                 return;
             }
-            container.innerHTML = reviewedTodayLog.map(item => `
+            container.innerHTML = reviewedTodayLog.map((item, index) => `
                 <div class="reviewed-item">
-                    <span class="en">${item.en}</span>
-                    <span class="ar">${item.ar}</span>
-                    <span class="status-dot ${item.status === 'easy' ? 'status-easy' : 'status-hard'}"></span>
+                    <div class="info-side">
+                        <span class="en">${item.en}</span>
+                        <span class="ar">${item.ar}</span>
+                    </div>
+                    <div class="action-side">
+                        <span class="status-dot ${item.status === 'easy' ? 'status-easy' : 'status-hard'}"></span>
+                        <button class="sidebar-item-del" onclick="deleteFromSidebar(${index})" title="حذف من السجل">✕</button>
+                    </div>
                 </div>
             `).reverse().join('');
         }
 
-        // دالة مخصصة لحذف الكرت الحالي نهائياً من الـ LocalStorage
+        // دالة مخصصة لحذف العناصر الخاطئة من القائمة الجانبية مباشرة
+        function deleteFromSidebar(index) {
+            reviewedTodayLog.splice(index, 1);
+            saveToStorage();
+            updateSidebarUI();
+        }
+
         function deleteCurrentCard() {
             if (currentCardIndex === -1) return;
             if (confirm("هل أنت متأكد من حذف هذه البطاقة نهائياً؟")) {
@@ -475,7 +491,7 @@
             }
         }
 
-        // دالة استيراد احترافية ومفلترة وخالية من رسائل الخطأ الغريبة
+        // دالة الاستيراد الجديدة المطابقة بدقة لهيكل ملفك المرفق
         async function importGoogleHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -483,7 +499,7 @@
             const statusElement = document.getElementById('import-status');
             statusElement.style.display = 'block';
             statusElement.style.color = '#FFFFFF';
-            statusElement.innerText = "جاري تصفية وتحليل ملف النشاط...";
+            statusElement.innerText = "جاري معالجة وتحليل ملف النشاط الفعلي...";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -495,12 +511,13 @@
                 const links = doc.querySelectorAll('a');
                 
                 links.forEach(link => {
-                    let cleanWord = link.textContent ? link.textContent.trim() : "";
+                    let cleanWord = link.textContent ? link.textContent.replace(/["'“”]/g, '').trim() : "";
                     const href = link.getAttribute('href') || "";
                     
-                    // شروط تضمن تصفية الكلمات الحقيقية المترجمة واستبعاد الأكواد أو الروابط المرجعية وقيم التنسيق
-                    if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord) && !cleanWord.includes(' ')) {
-                        if (href.includes('translate.google.com') && cleanWord.length < 25) {
+                    // استهداف روابط بحث قوقل المخصصة للمصطلحات المترجمة فقط في ملفك
+                    if (cleanWord && href.includes('google.com/search') && href.includes('q=')) {
+                        // استبعاد الكلمات المركبة أو الأكواد لضمان جلب كلمات مثل foyer و Biology
+                        if (/^[a-zA-Z]+$/.test(cleanWord) && cleanWord.length < 25) {
                             if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
                                 wordsToTranslate.push(cleanWord);
                             }
@@ -510,11 +527,11 @@
 
                 if (wordsToTranslate.length === 0) {
                     statusElement.style.color = 'var(--nothing-red)';
-                    statusElement.innerText = "لم يتم العثور على كلمات جديدة غير مكررة داخل الملف.";
+                    statusElement.innerText = "لم يتم العثور على كلمات جديدة مخصصة للاستيراد داخل الملف.";
                     return;
                 }
 
-                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة جديدة. جاري استيراد وترجمة الكلمات...`;
+                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة نقية. جاري الترجمة والتحفيظ الآن...`;
                 let importedCount = 0;
 
                 for (let i = 0; i < wordsToTranslate.length; i++) {
