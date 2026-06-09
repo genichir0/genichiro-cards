@@ -193,7 +193,6 @@
         .status-easy { background-color: #FFFFFF; }
         .status-hard { background-color: var(--nothing-red); }
         
-        /* زر حذف مراجعة معينة */
         .sidebar-item-del { background: transparent; border: none; color: var(--nothing-red); font-size: 0.85rem; cursor: pointer; padding: 2px 6px; opacity: 0.6; transition: opacity 0.2s; }
         .sidebar-item-del:hover { opacity: 1; background: transparent; color: var(--nothing-red); }
 
@@ -239,7 +238,7 @@
         .import-box:hover { border-color: var(--text-main); }
         .import-box p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
         .import-box input { display: none; }
-        .import-status { font-size: 0.85rem; color: var(--text-main); margin-top: 0.6rem; display: none; font-weight: 500; }
+        .import-status { font-size: 0.85rem; color: var(--text-main); margin-top: 0.6rem; display: none; font-weight: 500; text-align: center; }
 
         .flashcard-wrapper { perspective: 1000px; width: 100%; }
         .flashcard { width: 100%; height: 220px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
@@ -264,9 +263,11 @@
         button:hover { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
         button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
 
-        .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; }
+        .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; display: flex; justify-content: center; gap: 10px; }
         .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.3); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
         .btn-delete:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
+        .btn-clear-all { border-color: rgba(255,255,255,0.1); color: var(--text-muted); }
+        .btn-clear-all:hover { background: #333; color: #fff; border-color: #333; }
 
         .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px; position: relative; }
         .form-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
@@ -353,18 +354,19 @@
                 </div>
 
                 <div class="delete-action-wrapper">
-                    <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة من المراجعة</button>
+                    <button class="btn-delete" onclick="deleteCurrentCard()">✕ حذف هذه البطاقة</button>
+                    <button class="btn-delete btn-clear-all" onclick="clearAllData()">⚠️ تصغير وتصفير الذاكرة بالكامل</button>
                 </div>
             </div>
 
             <div id="empty-view" class="empty-state" style="display: none;">
-                أحسنت! لا توجد كلمات للمراجعة حالياً. أضف كلمات بالأسفل أو استورد ملف سجل قوقل الجديد.
+                أحسنت! لا توجد كلمات للمراجعة حالياً. ارفع ملفك الفعلي بالأسفل لسحب الكلمات فوراً.
             </div>
 
             <div class="add-word-form">
-                <div class="form-title">// استيراد ملف الكلمات الجديد المصفى</div>
+                <div class="form-title">// استيراد ملف الكلمات (MyActivity.html)</div>
                 <div class="import-box" onclick="document.getElementById('google-file').click()">
-                    <p id="import-box-text">اضغط هنا لرفع ملفك (MyActivity.html)<br>سيتم استخراج الكلمات التي قمت بترجمتها بدقة متناهية.</p>
+                    <p id="import-box-text">اضغط هنا لرفع ملفك الحقيقي<br>سيتم سحب وترجمة الكلمات المصفّاة تماماً مثل foyer و Biology.</p>
                     <div id="import-status" class="import-status"></div>
                     <input type="file" id="google-file" accept=".html" onchange="importGoogleHistory(event)">
                 </div>
@@ -475,7 +477,6 @@
             `).reverse().join('');
         }
 
-        // دالة مخصصة لحذف العناصر الخاطئة من القائمة الجانبية مباشرة
         function deleteFromSidebar(index) {
             reviewedTodayLog.splice(index, 1);
             saveToStorage();
@@ -491,7 +492,18 @@
             }
         }
 
-        // دالة الاستيراد الجديدة المطابقة بدقة لهيكل ملفك المرفق
+        // دالة تصفير كاملة للتخلص من كل مخلفات الكروت القديمة الخاطئة دفعة واحدة
+        function clearAllData() {
+            if (confirm("سيتم تصفير كافة الكروت المخزنة الحالية وسجل المراجعة تماماً للبدء بملفك الجديد بشكل نظيف. هل أنت متأكد؟")) {
+                cards = [];
+                reviewedTodayLog = [];
+                localStorage.clear();
+                saveToStorage();
+                updateUI();
+            }
+        }
+
+        // الدالة المعدلة بدقة فائقة لقراءة ملفك الحقيقي ومعالجة نصوص علامات التنصيص
         async function importGoogleHistory(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -499,7 +511,7 @@
             const statusElement = document.getElementById('import-status');
             statusElement.style.display = 'block';
             statusElement.style.color = '#FFFFFF';
-            statusElement.innerText = "جاري معالجة وتحليل ملف النشاط الفعلي...";
+            statusElement.innerText = "جاري قراءة وتحليل ملف النشاط الفعلي...";
 
             const reader = new FileReader();
             reader.onload = async function(e) {
@@ -511,15 +523,20 @@
                 const links = doc.querySelectorAll('a');
                 
                 links.forEach(link => {
-                    let cleanWord = link.textContent ? link.textContent.replace(/["'“”]/g, '').trim() : "";
+                    let textContent = link.textContent ? link.textContent.trim() : "";
                     const href = link.getAttribute('href') || "";
                     
-                    // استهداف روابط بحث قوقل المخصصة للمصطلحات المترجمة فقط في ملفك
-                    if (cleanWord && href.includes('google.com/search') && href.includes('q=')) {
-                        // استبعاد الكلمات المركبة أو الأكواد لضمان جلب كلمات مثل foyer و Biology
-                        if (/^[a-zA-Z]+$/.test(cleanWord) && cleanWord.length < 25) {
-                            if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
-                                wordsToTranslate.push(cleanWord);
+                    if (textContent) {
+                        // حل المشكلة الجوهرية: تنظيف وتنقية النصوص من صيغ علامات التنصيص المترجمة (مثل &quot; أو "foyer")
+                        let cleanWord = textContent.replace(/[\"\'\“\”\„\‟&quot;]/g, '').trim();
+
+                        // التحقق من الرابط: قوقل تضع الكلمات إما داخل نطاق البحث أو المترجم المباشر
+                        if (href.includes('translate.google.com') || href.includes('google.com/search')) {
+                            // قبول الكلمات الحقيقية المفردة المكونة من حروف إنجليزية فقط لضمان جلب foyer و Biology
+                            if (cleanWord && /^[a-zA-Z]+$/.test(cleanWord) && cleanWord.length < 30) {
+                                if (!cards.some(c => c.wordEn.toLowerCase() === cleanWord.toLowerCase()) && !wordsToTranslate.includes(cleanWord)) {
+                                    wordsToTranslate.push(cleanWord);
+                                }
                             }
                         }
                     }
@@ -527,11 +544,11 @@
 
                 if (wordsToTranslate.length === 0) {
                     statusElement.style.color = 'var(--nothing-red)';
-                    statusElement.innerText = "لم يتم العثور على كلمات جديدة مخصصة للاستيراد داخل الملف.";
+                    statusElement.innerText = "لم يتم العثور على كلمات جديدة صالحة داخل الملف.";
                     return;
                 }
 
-                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة نقية. جاري الترجمة والتحفيظ الآن...`;
+                statusElement.innerText = `تم العثور على ${wordsToTranslate.length} كلمة نقية. جاري ترجمتها وحفظها...`;
                 let importedCount = 0;
 
                 for (let i = 0; i < wordsToTranslate.length; i++) {
