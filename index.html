@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genichiro Cards // Nothing OS Edition</title>
+    
+    <!-- تم التعديل لتتوافق مع ملف icon.png العندك تماماً -->
+    <link rel="icon" type="image/png" href="icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Vazirmatn:wght@300;500;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0B0B0B;
+            --card-bg: #161616;
+            --border-color: #2C2C2C;
+            --text-main: #FFFFFF;
+            --text-muted: #888888;
+            --nothing-red: #FF3B30;
+            --font-tech: 'Space Grotesk', 'Vazirmatn', sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-tech);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            z-index: -1;
+            opacity: 0.5;
+        }
+
+        .app-layout {
+            width: 100%;
+            max-width: 1100px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        @media (max-width: 850px) {
+            .app-layout { grid-template-columns: 1fr; }
+            .sidebar { order: 2; }
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 1rem;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: 1px solid var(--border-color);
+            object-fit: cover;
+            background-color: #000000;
+            display: block;
+        }
+
+        .logo {
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo::after {
+            content: "";
+            width: 8px;
+            height: 8px;
+            background-color: var(--nothing-red);
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            margin-top: 0.6rem;
+            letter-spacing: 2px;
+        }
+
+        /* القائمة الجانبية */
+        .sidebar {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+
+        .sidebar-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .reviewed-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-left: 0.5rem;
+        }
+
+        .reviewed-list::-webkit-scrollbar { width: 3px; }
+        .reviewed-list::-webkit-scrollbar-track { background: transparent; }
+        .reviewed-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+
+        .reviewed-item {
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            background: #000000;
+            border-radius: 4px;
+            margin-bottom: 0.7rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .reviewed-item .en { font-weight: 700; letter-spacing: -0.5px; }
+        .reviewed-item .ar { color: var(--text-muted); font-size: 0.8rem; max-width: 140px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .status-easy { background-color: #FFFFFF; }
+        .status-hard { background-color: var(--nothing-red); }
+
+        /* المنطقة الرئيسية */
+        .main-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .tracker {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tracker-text { font-size: 0.9rem; color: var(--text-muted); }
+        .tracker-count { font-weight: 700; color: var(--text-main); border-bottom: 2px dashed var(--nothing-red); }
+
+        .goal-selector { display: flex; align-items: center; gap: 8px; }
+        .goal-selector label { font-size: 0.8rem; color: var(--text-muted); }
+        .goal-select { background: #000000; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.3rem 0.6rem; border-radius: 4px; font-weight: 700; outline: none; cursor: pointer; }
+
+        /* كرت الفلاش كارد */
+        .flashcard-wrapper { perspective: 1000px; }
+        .flashcard { width: 100%; height: 260px; position: relative; transform-style: preserve-3d; transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); cursor: pointer; }
+        .flashcard.flipped { transform: rotateY(180deg); }
+        
+        .card-face {
+            position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+            border: 1px solid var(--border-color); background: var(--card-bg); border-radius: 8px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 2rem; text-align: center;
+        }
+
+        .card-front .word { font-size: 2.4rem; font-weight: 700; letter-spacing: -0.5px; }
+        .card-front .hint { font-size: 0.75rem; color: var(--text-muted); position: absolute; bottom: 1.2rem; letter-spacing: 1px; }
+        .card-back { transform: rotateY(180deg); border-color: var(--text-muted); }
+        .card-back .meaning { font-size: 1.8rem; font-weight: 500; margin-bottom: 0.8rem; }
+        .card-back .context { font-size: 0.9rem; color: var(--text-muted); font-style: italic; line-height: 1.5; max-width: 90%; }
+
+        .controls { display: flex; gap: 1rem; }
+        button { background: transparent; color: var(--text-main); border: 1px solid var(--border-color); padding: 0.8rem 1.5rem; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.9rem; transition: all 0.2s ease; flex: 1; }
+        button:hover { background: var(--text-main); color: var(--bg-color); border-color: var(--text-main); }
+        button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
+
+        /* فورم الإدخال */
+        .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.5rem; border-radius: 8px; position: relative; }
+        .form-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
+        .input-group { margin-bottom: 1rem; text-align: right; position: relative; }
+        label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+        
+        input[type="text"], textarea {
+            width: 100%; background: #000000; border: 1px solid var(--border-color);
+            color: var(--text-main); padding: 0.7rem; border-radius: 4px; font-size: 0.95rem;
+        }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--text-main); }
+        textarea { resize: vertical; height: 65px; }
+        .submit-btn { width: 100%; background: var(--text-main); color: var(--bg-color); font-weight: 700; }
+        .submit-btn:hover { background: transparent; color: var(--text-main); }
+
+        .suggestions-box {
+            position: absolute; top: 100%; left: 0; width: 100%;
+            background: #111111; border: 1px solid var(--border-color);
+            border-top: none; border-radius: 0 0 4px 4px; z-index: 10;
+            max-height: 150px; overflow-y: auto; display: none;
+        }
+        .suggestion-item {
+            padding: 0.6rem 1rem; text-align: right; font-size: 0.85rem;
+            color: var(--text-main); cursor: pointer; border-bottom: 1px solid #1a1a1a;
+            transition: background 0.2s;
+        }
+        .suggestion-item:hover { background: var(--border-color); }
+        .suggestion-loading { padding: 0.6rem 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: right; }
+
+        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); border: 1px dashed var(--border-color); border-radius: 8px; font-size: 0.95rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand-container">
+            <!-- تم التحديث هنا أيضاً ليكون مسار الصورة الصحيح icon.png -->
+            <img src="icon.png" alt="Genichiro Logo" class="brand-icon">
+            <div class="logo">Genichiro Cards</div>
+        </div>
+        <div class="subtitle">SPACED REPETITION // MEMORY ENGINE</div>
+    </header>
+
+    <div class="app-layout">
+        
+        <!-- العمود الأيسر -->
+        <div class="sidebar">
+            <div class="sidebar-title">
+                <span>// تمت مراجعتها اليوم</span>
+                <span id="reviewed-count-badge" style="color: var(--text-muted); font-size: 0.8rem;">(0)</span>
+            </div>
+            <div class="reviewed-list" id="reviewed-list-container">
+                <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">لم تراجع أي كرت بعد.</div>
+            </div>
+        </div>
+
+        <!-- العمود الرئيسي -->
+        <div class="main-content">
+            
+            <div class="tracker">
+                <span class="tracker-text">الكلمات الجاهزة الآن: <span id="review-count" class="tracker-count">0</span></span>
+                <div class="goal-selector">
+                    <label for="daily-goal">// الهدف اليومي:</label>
+                    <select id="daily-goal" class="goal-select" onchange="changeDailyGoal()">
+                        <option value="5">5 كلمات</option>
+                        <option value="10" selected>10 كلمات</option>
+                        <option value="20">20 كلمة</option>
+                        <option value="30">30 كلمة</option>
+                        <option value="50">50 كلمة</option>
+                    </select>
+                </div>
+                <span class="tracker-text">المحفوظة اليوم: <span id="today-count" class="tracker-count">0/10</span></span>
+            </div>
+
+            <div id="card-section">
+                <div class="flashcard-wrapper">
+                    <div class="flashcard" id="main-card" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <div class="word" id="front-word">Subtle</div>
+                            <div class="hint">اضغط لقلب البطاقة // CLICK TO FLIP</div>
+                        </div>
+                        <div class="card-face card-back">
+                            <div class="meaning" id="back-meaning">دقيق / خفي / ذكي</div>
+                            <div class="context" id="back-context">"Nothing OS design has subtle details that make it premium."</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="controls" style="margin-top: 1rem;">
+                    <button class="btn-hard" onclick="rateWord('hard')">صعبة (تكرار غداً)</button>
+                    <button class="btn-easy" onclick="rateWord('easy')">سهلة (بعد 4 أيام)</button>
+                </div>
+            </div>
+
+            <div id="empty-view" class="empty-state" style="display: none;">
+                أحسنت! لا توجد كلمات للمراجعة حالياً في الذاكرة القريبة. أضف كلمات جديدة بالأسفل.
+            </div>
+
+            <div class="add-word-form">
+                <div class="form-title">// إدراج مفردة في النظام</div>
+                <form id="word-form" onsubmit="addNewWord(event)">
+                    
+                    <div class="input-group">
+                        <label for="word-en">الكلمة الإنجليزية (English Word)</label>
+                        <input type="text" id="word-en" required placeholder="e.g., Paradigm" dir="ltr" autocomplete="off" oninput="debounceFetchSuggestions()">
+                        <div id="suggestions" class="suggestions-box"></div>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="word-ar">المعنى بالعربي</label>
+                        <input type="text" id="word-ar" required placeholder="اكتب المعنى هنا أو اختر من الاقتراحات في الأعلى">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="word-context">السياق أو جملة مساعدة (اختياري)</label>
+                        <textarea id="word-context" placeholder="مثال: The internet created a paradigm shift in how we communicate." dir="ltr"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">تثبيت في الذاكرة +</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let cards = JSON.parse(localStorage.getItem('genichiro_cards')) || [];
+        let reviewedTodayLog = JSON.parse(localStorage.getItem('genichiro_reviewed_today')) || [];
+        let currentCardIndex = -1;
+        let dailyGoalSetting = localStorage.getItem('genichiro_daily_goal') || "10";
+        let typingTimer;
+
+        if (cards.length === 0 && reviewedTodayLog.length === 0) {
+            cards = [
+                {
+                    id: 1,
+                    wordEn: "Subtle",
+                    wordAr: "دقيق / خفي / ذكي",
+                    context: "Nothing OS design has subtle details that make it premium.",
+                    nextReview: new Date().toISOString(),
+                    interval: 1
+                }
+            ];
+            saveToStorage();
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('genichiro_cards', JSON.stringify(cards));
+            localStorage.setItem('genichiro_reviewed_today', JSON.stringify(reviewedTodayLog));
+            localStorage.setItem('genichiro_daily_goal', dailyGoalSetting);
+        }
+
+        function checkDateReset() {
+            const todayStr = new Date().toDateString();
+            const lastLogDate = localStorage.getItem('genichiro_last_date') || todayStr;
+            if (lastLogDate !== todayStr) {
+                reviewedTodayLog = [];
+                localStorage.setItem('genichiro_last_date', todayStr);
+                saveToStorage();
+            }
+        }
+
+        function flipCard() {
+            document.getElementById('main-card').classList.toggle('flipped');
+        }
+
+        function getReviewQueue() {
+            const now = new Date();
+            return cards.filter(card => new Date(card.nextReview) <= now);
+        }
+
+        function updateUI() {
+            checkDateReset();
+            document.getElementById('daily-goal').value = dailyGoalSetting;
+            const queue = getReviewQueue();
+            document.getElementById('review-count').innerText = queue.length;
+            
+            const todayStr = new Date().toDateString();
+            const addedToday = cards.filter(card => card.id && new Date(card.id).toDateString() === todayStr).length;
+            document.getElementById('today-count').innerText = `${addedToday}/${dailyGoalSetting}`;
+
+            if (queue.length === 0) {
+                document.getElementById('card-section').style.display = 'none';
+                document.getElementById('empty-view').style.display = 'block';
+                currentCardIndex = -1;
+            } else {
+                document.getElementById('card-section').style.display = 'block';
+                document.getElementById('empty-view').style.display = 'none';
+                
+                const currentCard = queue[0];
+                currentCardIndex = cards.findIndex(c => c.id === currentCard.id);
+                document.getElementById('main-card').classList.remove('flipped');
+                
+                setTimeout(() => {
+                    document.getElementById('front-word').innerText = currentCard.wordEn;
+                    document.getElementById('back-meaning').innerText = currentCard.wordAr;
+                    document.getElementById('back-context').innerText = currentCard.context ? `"${currentCard.context}"` : '';
+                }, 150);
+            }
+            updateSidebarUI();
+        }
+
+        function updateSidebarUI() {
+            const container = document.getElementById('reviewed-list-container');
+            document.getElementById('reviewed-count-badge').innerText = `(${reviewedTodayLog.length})`;
+            
+            if (reviewedTodayLog.length === 0) {
+                container.innerHTML = `<div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; margin-top: 2rem;">لم تراجع أي كرت بعد.</div>`;
+                return;
+            }
+            container.innerHTML = reviewedTodayLog.map(item => `
+                <div class="reviewed-item">
+                    <span class="en">${item.en}</span>
+                    <span class="ar">${item.ar}</span>
+                    <span class="status-dot ${item.status === 'easy' ? 'status-easy' : 'status-hard'}"></span>
+                </div>
+            `).reverse().join('');
+        }
+
+        function debounceFetchSuggestions() {
+            clearTimeout(typingTimer);
+            const query = document.getElementById('word-en').value.trim();
+            const suggestionsBox = document.getElementById('suggestions');
+            
+            if (!query) {
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            suggestionsBox.style.display = 'block';
+            suggestionsBox.innerHTML = `<div class="suggestion-loading">جاري البحث عن معاني مقترحة...</div>`;
+            
+            typingTimer = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 800);
+        }
+
+        function fetchSuggestions(word) {
+            const suggestionsBox = document.getElementById('suggestions');
+            const apiUrl = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(word)}&langpair=en|ar`;
+
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        const mainTranslation = data.responseData.translatedText;
+                        
+                        let alternatives = [];
+                        if (data.matches && data.matches.length > 0) {
+                            alternatives = data.matches
+                                .map(m => m.translation.trim())
+                                .filter((v, i, a) => a.indexOf(v) === i && v.toLowerCase() !== word.toLowerCase());
+                        }
+
+                        if (!alternatives.includes(mainTranslation)) {
+                            alternatives.unshift(mainTranslation);
+                        }
+
+                        const finalOptions = alternatives.slice(0, 4);
+
+                        if(finalOptions.length > 0) {
+                            suggestionsBox.innerHTML = finalOptions.map(translate => `
+                                <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(translate)}')">${translate}</div>
+                            `).join('');
+                        } else {
+                            suggestionsBox.innerHTML = `<div class="suggestion-loading">لم نجد اقتراحات، اكتب المعنى يدوياً</div>`;
+                        }
+                    } else {
+                        suggestionsBox.innerHTML = `<div class="suggestion-loading">لم نجد اقتراحات، اكتب المعنى يدوياً</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error fetching translation:", error);
+                    suggestionsBox.innerHTML = `<div class="suggestion-loading">خطأ في الاتصال بالقاموس</div>`;
+                });
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+        }
+
+        function selectSuggestion(translatedValue) {
+            document.getElementById('word-ar').value = translatedValue;
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.id !== 'word-en') {
+                document.getElementById('suggestions').style.display = 'none';
+            }
+        });
+
+        function rateWord(rating) {
+            if (currentCardIndex === -1) return;
+            const card = cards[currentCardIndex];
+            const now = new Date();
+
+            reviewedTodayLog.push({
+                en: card.wordEn,
+                ar: card.wordAr,
+                status: rating,
+                timestamp: Date.now()
+            });
+
+            if (rating === 'easy') {
+                if (!card.interval || card.interval < 4) { card.interval = 4; }
+                else if (card.interval === 4) { card.interval = 14; }
+                else { card.interval = 30; }
+                now.setDate(now.getDate() + card.interval);
+            } else if (rating === 'hard') {
+                card.interval = 1;
+                now.setDate(now.getDate() + 1);
+            }
+
+            card.nextReview = now.toISOString();
+            saveToStorage();
+            updateUI();
+        }
+
+        function addNewWord(e) {
+            e.preventDefault();
+            const wordEn = document.getElementById('word-en').value.trim();
+            const wordAr = document.getElementById('word-ar').value.trim();
+            const context = document.getElementById('word-context').value.trim();
+            
+            const newCard = {
+                id: Date.now(),
+                wordEn: wordEn,
+                wordAr: wordAr,
+                context: context,
+                nextReview: new Date().toISOString(),
+                interval: 0
+            };
+            
+            cards.push(newCard);
+            saveToStorage();
+            document.getElementById('word-form').reset();
+            updateUI();
+        }
+
+        function changeDailyGoal() {
+            dailyGoalSetting = document.getElementById('daily-goal').value;
+            saveToStorage();
+            updateUI();
+        }
+
+        window.onload = function() {
+            localStorage.setItem('genichiro_last_date', new Date().toDateString());
+            updateUI();
+        };
+    </script>
+</body>
+</html>
