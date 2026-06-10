@@ -13,11 +13,11 @@
     
     <style>
         :root {
-            --bg-color: #0B0B0B;
-            --card-bg: #161616;
-            --border-color: #2C2C2C;
+            --bg-color: #000000;
+            --card-bg: #000000;
+            --border-color: #222222;
             --text-main: #FFFFFF;
-            --text-muted: #888888;
+            --text-muted: #777777;
             --nothing-red: #FF3B30;
             --font-tech: 'Space Grotesk', 'Vazirmatn', sans-serif;
         }
@@ -47,11 +47,11 @@
         body::before {
             content: "";
             position: fixed;
- Top: 0; left: 0; width: 100%; height: 100%;
-            background-image: radial-gradient(var(--border-color) 1px, transparent 1px);
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(#1a1a1a 1px, transparent 1px);
             background-size: 24px 24px;
             z-index: -1;
-            opacity: 0.5;
+            opacity: 0.4;
         }
 
         .app-layout {
@@ -228,14 +228,14 @@
         .import-box {
             background: #000000;
             border: 2px dashed var(--border-color);
-            padding: 1.5rem 1.2rem;
+            padding: 2.5rem 1.2rem;
             border-radius: 6px;
             text-align: center;
             margin-bottom: 1rem;
             cursor: pointer;
             transition: border-color 0.2s ease;
         }
-        .import-box:hover { border-color: var(--text-main); }
+        .import-box:hover { border-color: #444444; }
         .import-box p { font-size: 1rem; font-weight: 700; color: var(--text-muted); }
         .import-box input { display: none; }
         .import-status { font-size: 0.85rem; color: var(--text-main); margin-top: 0.6rem; display: none; font-weight: 500; text-align: center; }
@@ -254,7 +254,7 @@
 
         .card-front .word { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; word-break: break-word; }
         .card-front .hint { font-size: 0.7rem; color: var(--text-muted); position: absolute; bottom: 1rem; letter-spacing: 1px; }
-        .card-back { transform: rotateY(180deg); border-color: var(--text-muted); }
+        .card-back { transform: rotateY(180deg); border-color: #444444; }
         .card-back .meaning { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.6rem; word-break: break-word; }
         .card-back .context { font-size: 0.85rem; color: var(--text-muted); font-style: italic; line-height: 1.4; max-width: 95%; word-break: break-word; }
 
@@ -264,10 +264,10 @@
         button.btn-hard:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
 
         .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; display: flex; justify-content: center; gap: 10px; }
-        .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.3); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.2); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; }
         .btn-delete:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
-        .btn-clear-all { border-color: rgba(255,255,255,0.1); color: var(--text-muted); }
-        .btn-clear-all:hover { background: #333; color: #fff; border-color: #333; }
+        .btn-clear-all { border-color: rgba(255,255,255,0.05); color: var(--text-muted); }
+        .btn-clear-all:hover { background: #222; color: #fff; border-color: #222; }
 
         .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px; position: relative; }
         .form-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
@@ -278,17 +278,17 @@
             width: 100%; background: #000000; border: 1px solid var(--border-color);
             color: var(--text-main); padding: 0.7rem; border-radius: 4px; font-size: 0.9rem;
         }
-        input[type="text"]:focus, textarea:focus { outline: none; border-color: var(--text-main); }
+        input[type="text"]:focus, textarea:focus { outline: none; border-color: #444444; }
         textarea { resize: vertical; height: 65px; }
         .submit-btn { width: 100%; background: var(--text-main); color: var(--bg-color); font-weight: 700; margin-top: 0.5rem; }
 
         .suggestions-box {
             position: absolute; top: 100%; left: 0; width: 100%;
-            background: #111111; border: 1px solid var(--border-color);
+            background: #000000; border: 1px solid var(--border-color);
             border-top: none; border-radius: 0 0 4px 4px; z-index: 10;
             max-height: 150px; overflow-y: auto; display: none;
         }
-        .suggestion-item { padding: 0.6rem 1rem; text-align: right; font-size: 0.85rem; color: var(--text-main); cursor: pointer; border-bottom: 1px solid #1a1a1a; }
+        .suggestion-item { padding: 0.6rem 1rem; text-align: right; font-size: 0.85rem; color: var(--text-main); cursor: pointer; border-bottom: 1px solid #111111; }
         .suggestion-item:hover { background: var(--border-color); }
         .suggestion-loading { padding: 0.6rem 1rem; color: var(--text-muted); font-size: 0.8rem; text-align: right; }
 
@@ -332,7 +332,7 @@
                         <option value="99999">كل الكلمات</option>
                     </select>
                 </div>
-                <span class="tracker-text">المحفظة اليوم: <span id="today-count" class="tracker-count">0 / 10</span></span>
+                <span class="tracker-text">المحفوظة اليوم: <span id="today-count" class="tracker-count">0 / 10</span></span>
             </div>
 
             <div id="card-section">
@@ -524,10 +524,7 @@
                     const href = link.getAttribute('href') || "";
                     
                     if (textContent) {
-                        // تنظيف الفلتر لإخراج الكلمة الصافية النقيّة فقط من قوقل
                         let cleanWord = textContent.replace(/[\"\'\“\”\„\‟&quot;]/g, '').trim();
-                        
-                        // حذف أي نصوص مرافقة متبقية من سحب الروابط لتبقى الكلمة الإنجليزية فقط
                         cleanWord = cleanWord.replace(/Translated\s+/gi, '').replace(/[\.\,\:\?]/g, '').trim();
 
                         if (href.includes('translate.google.com') || href.includes('google.com/search')) {
