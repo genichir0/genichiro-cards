@@ -19,6 +19,7 @@
             --text-main: #FFFFFF;
             --text-muted: #777777;
             --nothing-red: #FF3B30;
+            --nothing-green: #34C759;
             --font-tech: 'Space Grotesk', 'Vazirmatn', sans-serif;
         }
 
@@ -145,7 +146,8 @@
 
         @media (min-width: 850px) {
             .sidebar { 
-                height: 630px; 
+                height: auto;
+                min-height: 400px; 
                 padding: 1.5rem;
             }
         }
@@ -194,7 +196,7 @@
         }
 
         @media (min-width: 850px) {
-            .reviewed-list { max-height: none; }
+            .reviewed-list { max-height: 400px; }
         }
 
         .reviewed-list::-webkit-scrollbar { width: 3px; }
@@ -224,7 +226,6 @@
         .sidebar-item-del { background: transparent; border: none; color: var(--nothing-red); font-size: 0.85rem; cursor: pointer; padding: 2px 6px; opacity: 0.6; transition: opacity 0.2s; width: auto; flex: none; }
         .sidebar-item-del:hover { opacity: 1; background: transparent; color: var(--nothing-red); }
 
-        /* تعديل البطاقة لتثبت في الزاوية السفلى اليسار */
         .dev-support-card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -395,7 +396,16 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 1.5rem; text-align: center;
         }
 
+        .word-audio-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 0.5rem;
+        }
+
         .card-front .word { font-size: 2rem; font-weight: 700; letter-spacing: -0.5px; word-break: break-word; }
+        
         .card-front .hint { font-size: 0.7rem; color: var(--text-muted); position: absolute; bottom: 1rem; letter-spacing: 1px; }
         .card-back { transform: rotateY(180deg); border-color: #444444; }
         .card-back .meaning { font-size: 1.5rem; font-weight: 500; margin-bottom: 0.6rem; word-break: break-word; }
@@ -409,6 +419,82 @@
         .delete-action-wrapper { width: 100%; text-align: center; margin-top: 0.6rem; display: flex; justify-content: center; }
         .btn-delete { background: transparent; color: var(--nothing-red); border: 1px solid rgba(255, 59, 48, 0.2); padding: 0.4rem 1rem; font-size: 0.75rem; border-radius: 4px; font-weight: 500; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; gap: 4px; width: auto; flex: none; }
         .btn-delete:hover { background: var(--nothing-red); color: #FFFFFF; border-color: var(--nothing-red); }
+
+        /* تصفيف نظام الاختبار المطور */
+        .quiz-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.2rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+        .quiz-config {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .btn-quiz-start {
+            background: var(--nothing-green);
+            color: #FFFFFF;
+            border-color: var(--nothing-green);
+            padding: 0.6rem 1.2rem;
+        }
+        .btn-quiz-start:hover {
+            background: #2ebd4f;
+            border-color: #2ebd4f;
+            color: #FFFFFF;
+        }
+        .quiz-box {
+            border: 1px dashed #444444;
+            border-radius: 6px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            text-align: center;
+            display: none;
+            position: relative;
+        }
+        .quiz-word {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+        .quiz-answer-hidden {
+            background: #111111;
+            color: var(--text-muted);
+            padding: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+        .quiz-answer-shown {
+            display: none;
+            margin-bottom: 1rem;
+        }
+        .quiz-meaning {
+            font-size: 1.4rem;
+            color: var(--text-main);
+            font-weight: 700;
+            margin-bottom: 0.4rem;
+        }
+        .quiz-context {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+        .quiz-actions {
+            display: none;
+            gap: 0.8rem;
+        }
+        .quiz-progress {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 0.8rem;
+            text-align: left;
+        }
 
         .add-word-form { background: var(--card-bg); border: 1px solid var(--border-color); padding: 1.2rem; border-radius: 8px; position: relative; }
         .form-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 1rem; letter-spacing: 1px; }
@@ -479,12 +565,49 @@
                 <span class="tracker-text">المحفوظة اليوم: <span id="today-count" class="tracker-count">0 / 10</span></span>
             </div>
 
+            <div class="quiz-panel">
+                <div class="quiz-config" id="quiz-config-view">
+                    <span class="tracker-text" style="font-weight: 700; color: var(--text-main);">// محاكي الاختبار الذكي (يركز على الكلمات الأقدم والأقل مراجعة):</span>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <select id="quiz-size" class="goal-select" style="padding: 0.4rem 1.5rem 0.4rem 0.5rem;">
+                            <option value="5">5 كلمات</option>
+                            <option value="10" selected>10 كلمات</option>
+                            <option value="20">20 كلمة</option>
+                            <option value="all">كل الكلمات المتاحة</option>
+                        </select>
+                        <button class="btn-quiz-start" onclick="startQuiz()">ابدأ الاختبار 🚀</button>
+                    </div>
+                </div>
+
+                <div class="quiz-box" id="quiz-box-view">
+                    <div class="quiz-word" id="quiz-word-text">Paradigm</div>
+                    
+                    <div class="quiz-answer-hidden" id="quiz-trigger" onclick="revealQuizAnswer()">
+                        انقر هنا لكشف الإجابة والمعنى المترجم // REVEAL ANSWER
+                    </div>
+
+                    <div class="quiz-answer-shown" id="quiz-details">
+                        <div class="quiz-meaning" id="quiz-meaning-text">نموذج / مثال</div>
+                        <div class="quiz-context" id="quiz-context-text">"The internet created a paradigm shift."</div>
+                    </div>
+
+                    <div class="quiz-actions" id="quiz-buttons">
+                        <button class="btn-hard" onclick="submitQuizRating('hard')">أخطأت / صعبة</button>
+                        <button style="border-color: var(--nothing-green);" onclick="submitQuizRating('easy')">عرفتها / سهلة</button>
+                    </div>
+
+                    <div class="quiz-progress" id="quiz-progress-text">كلمة 1 من 10</div>
+                </div>
+            </div>
+
             <div id="card-section">
                 <div class="flashcard-wrapper">
                     <div class="flashcard" id="main-card" onclick="flipCard()">
                         <div class="card-face card-front">
-                            <div class="word" id="front-word">Subtle</div>
-                            <div class="hint">اضغط لقلب البطاقة // CLICK TO FLIP</div>
+                            <div class="word-audio-container">
+                                <div class="word" id="front-word">Subtle</div>
+                            </div>
+                            <div class="hint">اضغط على أي مكان لقلب البطاقة // CLICK TO FLIP</div>
                         </div>
                         <div class="card-face card-back">
                             <div class="meaning" id="back-meaning">دقيق / خفي / ذكي</div>
@@ -504,7 +627,7 @@
             </div>
 
             <div id="empty-view" class="empty-state" style="display: none;">
-                أحسنت! لا توجد كلمات للمراجعة حالياً. ارفع ملفك بالأسفل.
+                أحسنت! لا توجد كلمات متبقية للمراجعة التقليدية حالياً. يمكنك استخدام محاكي الاختبار بالأعلى أو إضافة كلمات جديدة بالأسفل.
             </div>
 
             <div class="add-word-form">
@@ -555,14 +678,37 @@
     </div>
 
     <script>
-        let cards = JSON.parse(localStorage.getItem('genichiro_cards')) || [];
+        // آلية حفظ واسترجاع فولاذية تمنع المتصفح من تصفير المفردات تلقائياً وعبر الجلسات الممتدة
+        let cards = [];
+        try {
+            const rawCards = localStorage.getItem('genichiro_cards');
+            if (rawCards) {
+                cards = JSON.parse(rawCards);
+            }
+        } catch (e) {
+            console.error("خطأ في قراءة قاعدة البيانات المحلية، تم التهيئة من جديد", e);
+            cards = [];
+        }
+
         let reviewedTodayLog = JSON.parse(localStorage.getItem('genichiro_reviewed_today')) || [];
         let currentCardIndex = -1;
         let dailyGoalSetting = localStorage.getItem('genichiro_daily_goal') || "10";
         let typingTimer;
 
+        // متغيرات حالة نظام الاختبار
+        let quizQueue = [];
+        let quizCurrentIndex = 0;
+
         if (cards.length === 0 && reviewedTodayLog.length === 0) {
-            cards = [{ id: 1, wordEn: "Subtle", wordAr: "دقيق / خفي / ذكي", context: "Nothing OS design has subtle details.", nextReview: new Date().toISOString(), interval: 1 }];
+            cards = [{ 
+                id: 1, 
+                wordEn: "Subtle", 
+                wordAr: "دقيق / خفي / ذكي", 
+                context: "Nothing OS design has subtle details.", 
+                nextReview: new Date().toISOString(), 
+                lastReviewedAt: 0, // 0 يعني لم يراجع مطلقاً
+                interval: 1 
+            }];
             saveToStorage();
         }
 
@@ -582,7 +728,103 @@
         }
 
         function flipCard() { document.getElementById('main-card').classList.toggle('flipped'); }
-        function getReviewQueue() { return cards.filter(card => new Date(card.nextReview) <= new Date()); }
+
+        function getReviewQueue() { 
+            return cards.filter(card => new Date(card.nextReview) <= new Date()); 
+        }
+
+        /* خوارزمية الاختبار الذكي: 
+           تفرز الكلمات بحيث تعطي الأولوية القصوى للكلمات التي لم تُختبر ولم تُراجع أبداً (lastReviewedAt = 0)
+           ثم تفرز باقي الكلمات تنازلياً حسب الأقدم مراجعة (عمر الانقطاع طويل جداً)
+        */
+        function startQuiz() {
+            if (cards.length === 0) {
+                alert("لا توجد كلمات في ذاكرتك لإجراء الاختبار! أضف بعض الكلمات أولاً.");
+                return;
+            }
+
+            const sizeSelect = document.getElementById('quiz-size').value;
+            
+            // ترتيب ذكي ومحكم بناءً على معاييرك
+            let sortedForQuiz = [...cards].sort((a, b) => {
+                let timeA = a.lastReviewedAt || 0;
+                let timeB = b.lastReviewedAt || 0;
+                
+                if (timeA === 0 && timeB !== 0) return -1; // a لم يراجع مطلقاً، يظهر أولاً
+                if (timeB === 0 && timeA !== 0) return 1;  // b لم يراجع مطلقاً، يظهر أولاً
+                
+                return timeA - timeB; // الأقدم مراجعة يظهر أولاً
+            });
+
+            let limit = sizeSelect === 'all' ? sortedForQuiz.length : parseInt(sizeSelect);
+            quizQueue = sortedForQuiz.slice(0, limit);
+            quizCurrentIndex = 0;
+
+            document.getElementById('quiz-config-view').style.display = 'none';
+            document.getElementById('quiz-box-view').style.display = 'block';
+            
+            showQuizCard();
+        }
+
+        function showQuizCard() {
+            if (quizCurrentIndex >= quizQueue.length) {
+                alert("🎉 مذهل! أنهيت جميع كلمات الاختبار الحالي بنجاح وثُبّتت في الذاكرة بعيدة المدى.");
+                exitQuizMode();
+                return;
+            }
+
+            const currentQuizCard = quizQueue[quizCurrentIndex];
+            document.getElementById('quiz-word-text').innerText = currentQuizCard.wordEn;
+            document.getElementById('quiz-meaning-text').innerText = currentQuizCard.wordAr;
+            document.getElementById('quiz-context-text').innerText = currentQuizCard.context ? `"${currentQuizCard.context}"` : '';
+
+            // إعادة ضبط أزرار العرض والتحكم
+            document.getElementById('quiz-trigger').style.display = 'block';
+            document.getElementById('quiz-details').style.display = 'none';
+            document.getElementById('quiz-buttons').style.display = 'none';
+            document.getElementById('quiz-progress-text').innerText = `مفردة ${quizCurrentIndex + 1} من أصل ${quizQueue.length}`;
+        }
+
+        function revealQuizAnswer() {
+            document.getElementById('quiz-trigger').style.display = 'none';
+            document.getElementById('quiz-details').style.display = 'block';
+            document.getElementById('quiz-buttons').style.display = 'flex';
+        }
+
+        function submitQuizRating(rating) {
+            const currentQuizCard = quizQueue[quizCurrentIndex];
+            // العثور على الكرت الأصلي في مصفوفة البيانات الأساسية لتحديثه
+            const masterIndex = cards.findIndex(c => c.id === currentQuizCard.id);
+            
+            if (masterIndex !== -1) {
+                const card = cards[masterIndex];
+                const now = new Date();
+                
+                // تسجيل الوقت الحالي لإثبات المراجعة وضمان خروجها من طابور الأقدمية
+                card.lastReviewedAt = Date.now();
+                reviewedTodayLog.push({ en: card.wordEn, ar: card.wordAr, status: rating, timestamp: Date.now() });
+
+                if (rating === 'easy') {
+                    card.interval = (!card.interval || card.interval < 4) ? 4 : (card.interval === 4 ? 14 : 30);
+                    now.setDate(now.getDate() + card.interval);
+                } else {
+                    card.interval = 1; 
+                    now.setDate(now.getDate() + 1);
+                }
+                card.nextReview = now.toISOString();
+                saveToStorage();
+            }
+
+            quizCurrentIndex++;
+            showQuizCard();
+            updateUI();
+        }
+
+        function exitQuizMode() {
+            document.getElementById('quiz-box-view').style.display = 'none';
+            document.getElementById('quiz-config-view').style.display = 'flex';
+            updateUI();
+        }
 
         function updateUI() {
             checkDateReset();
@@ -652,11 +894,13 @@
         }
 
         function clearAllData() {
-            cards = [];
-            reviewedTodayLog = [];
-            localStorage.clear();
-            saveToStorage();
-            updateUI();
+            if(confirm("هل أنت متأكد تماماً من تصفير الذاكرة؟ سيؤدي هذا لمسح جميع مفرداتك المخزنة.")) {
+                cards = [];
+                reviewedTodayLog = [];
+                localStorage.clear();
+                saveToStorage();
+                updateUI();
+            }
         }
 
         async function importGoogleHistory(event) {
@@ -721,6 +965,7 @@
                             wordAr: arTranslation,
                             context: "مستورد من السجل",
                             nextReview: new Date().toISOString(),
+                            lastReviewedAt: 0,
                             interval: 0
                         });
                         importedCount++;
@@ -731,6 +976,7 @@
                             wordAr: "تعديل يدوي",
                             context: "مستورد من السجل",
                             nextReview: new Date().toISOString(),
+                            lastReviewedAt: 0,
                             interval: 0
                         });
                         importedCount++;
@@ -778,6 +1024,8 @@
             if (currentCardIndex === -1) return;
             const card = cards[currentCardIndex];
             const now = new Date();
+            
+            card.lastReviewedAt = Date.now(); // تحديث تاريخ المراجعة الفعلية فوراً
             reviewedTodayLog.push({ en: card.wordEn, ar: card.wordAr, status: rating, timestamp: Date.now() });
 
             if (rating === 'easy') {
@@ -787,7 +1035,8 @@
                 card.interval = 1; now.setDate(now.getDate() + 1);
             }
             card.nextReview = now.toISOString();
-            saveToStorage(); updateUI();
+            saveToStorage(); 
+            updateUI();
         }
 
         function addNewWord(e) {
@@ -798,13 +1047,20 @@
                 wordAr: document.getElementById('word-ar').value.trim(),
                 context: document.getElementById('word-context').value.trim(),
                 nextReview: new Date().toISOString(),
+                lastReviewedAt: 0, // كلمة جديدة لم تراجع قط
                 interval: 0
             });
-            saveToStorage(); document.getElementById('word-form').reset(); updateUI();
+            saveToStorage(); 
+            document.getElementById('word-form').reset(); 
+            updateUI();
         }
 
         function changeDailyGoal() { dailyGoalSetting = document.getElementById('daily-goal').value; saveToStorage(); updateUI(); }
-        window.onload = function() { localStorage.setItem('genichiro_last_date', new Date().toDateString()); updateUI(); };
+        
+        window.onload = function() { 
+            localStorage.setItem('genichiro_last_date', new Date().toDateString()); 
+            updateUI(); 
+        };
     </script>
 </body>
 </html>
